@@ -1,0 +1,7 @@
+# NUNCA subir secretos ni claves
+.streamlit/secrets.toml
+*.json
+!*/package.json
+__pycache__/
+*.pyc
+.DS_Store
