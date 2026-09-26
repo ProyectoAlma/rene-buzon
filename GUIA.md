@@ -13,8 +13,8 @@ de 6 minutos del script.
 ## Paso 1 — Crear la Unidad compartida (2 min)
 
 1. Entrá a Google Drive con la cuenta de **Workspace de René Boiero**.
-2. Barra izquierda → **Unidades compartidas** → **Nueva** → nombrala, ej.
-   `Buzón - Material del equipo`.
+2. Barra izquierda → **Unidades compartidas** → **Nueva** → nombrala (ej. `Contenido René Boiero`). Podés tener varias — todas
+   aparecerán en el desplegable de la app.
 3. Abrila y mirá la URL:
    `https://drive.google.com/drive/folders/0AXXXXXXXXXXXXXXXX`
    Ese `0A...` es el **ID de la Unidad compartida**. Anotalo (va en los secrets).
@@ -37,13 +37,14 @@ Si lo dejás vacío, todo cae en la raíz de la unidad.)*
 6. Copiá el **email** de la cuenta de servicio (algo como
    `buzon-rene@buzon-rene.iam.gserviceaccount.com`).
 
-## Paso 3 — Darle acceso a la Unidad compartida (1 min)
+## Paso 3 — Darle acceso a las Unidades compartidas (1 min c/u)
 
-1. Volvé a la **Unidad compartida** del Paso 1 → **Administrar miembros**.
-2. Pegá el **email de la cuenta de servicio** y dale rol
-   **Administrador de contenido** (Content manager). Guardar.
+Por cada **Unidad compartida** que quieras que aparezca en el desplegable de la
+app: abrila → **Administrar miembros** → pegá el **email de la cuenta de
+servicio** → rol **Administrador de contenido** (Content manager) → Guardar.
 
-> Con esto la app puede escribir en esa unidad — y **solo en esa unidad**.
+> La app muestra automáticamente TODAS las unidades donde el service account sea
+> miembro. Agregalo solo a las que quieras ofrecer para subir.
 
 ---
 
@@ -70,10 +71,10 @@ Si lo dejás vacío, todo cae en la raíz de la unidad.)*
    client_x509_cert_url = "..."
 
    [drive]
-   shared_drive_id = "0AXXXXXXXXXXXXXXXX"
-   base_folder_id = ""
    access_code = "rene2026"
    ```
+   > No hace falta fijar una unidad: la app lista todas donde agregaste el
+   > service account (Paso 3). Cada persona elige unidad y carpeta en el desplegable.
 
    > Truco para `private_key`: en el `.json` la clave viene con `\n`. Pegala tal
    > cual, entre comillas, en una sola línea. Streamlit la interpreta bien.
