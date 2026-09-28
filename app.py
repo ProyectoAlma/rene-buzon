@@ -238,6 +238,61 @@ def copy_folder_recursive(svc, src_id, src_name, dest_parent, drive_id, counter,
                 counter["err"].append((it["name"], str(e)))
     return new_folder
 
+import datetime
+
+# ----------------------------- Historial -------------------------------------
+HIST_DRIVE_ID = "0AHF1RZNFYZ52Uk9PVA"   # unidad MIGRACION: aca vive el historial
+HIST_NAME = "_historial_buzon.json"
+
+def _now_ar():
+    return (datetime.datetime.utcnow() - datetime.timedelta(hours=3)).strftime("%d/%m %H:%M")
+
+def _dest_label(unidad, carpeta, nueva):
+    if carpeta == NUEVA: c = (nueva or "carpeta nueva")
+    elif carpeta == RAIZ: c = "Raíz"
+    else: c = carpeta
+    return "%s / %s" % (unidad, c)
+
+def _hist_fid(svc):
+    try:
+        r = svc.files().list(q="name = '%s' and trashed = false" % HIST_NAME,
+            corpora="drive", driveId=HIST_DRIVE_ID, includeItemsFromAllDrives=True,
+            supportsAllDrives=True, fields="files(id)", pageSize=1).execute()
+        fs = r.get("files", [])
+        return fs[0]["id"] if fs else None
+    except Exception:
+        return None
+
+def hist_read(svc):
+    import json
+    from googleapiclient.http import MediaIoBaseDownload
+    fid = _hist_fid(svc)
+    if not fid: return []
+    try:
+        buf = io.BytesIO()
+        dl = MediaIoBaseDownload(buf, svc.files().get_media(fileId=fid, supportsAllDrives=True))
+        done = False
+        while not done: _, done = dl.next_chunk()
+        return json.loads(buf.getvalue().decode("utf-8") or "[]")
+    except Exception:
+        return []
+
+def hist_log(svc, records):
+    import json
+    from googleapiclient.http import MediaIoBaseUpload
+    try:
+        data = hist_read(svc); data.extend(records); data = data[-3000:]
+        media = MediaIoBaseUpload(io.BytesIO(json.dumps(data, ensure_ascii=False).encode("utf-8")),
+                                  mimetype="application/json", resumable=False)
+        fid = _hist_fid(svc)
+        if fid:
+            svc.files().update(fileId=fid, media_body=media, supportsAllDrives=True).execute()
+        else:
+            svc.files().create(body={"name": HIST_NAME, "parents": [HIST_DRIVE_ID]},
+                media_body=media, supportsAllDrives=True, fields="id").execute()
+    except Exception:
+        pass
+
 # ----------------------------- Acceso ----------------------------------------
 if not CONFIG_OK:
     st.markdown('<div class="warn">⚙️ <b>Modo vista previa.</b> Todavía no está '
@@ -321,15 +376,22 @@ if gate():
             svc = get_drive()
             dest = resolve_dest(svc, drive_id, carpeta, folders_map, nueva)
             if dest:
-                prog = st.progress(0.0, text="Subiendo…"); oks = []; ids = []
+                prog = st.progress(0.0, text="Subiendo…"); oks = []; ids = []; recs = []
+                _dl = _dest_label(unidad, carpeta, nueva)
+                _q = (st.session_state.get("nombre") or "—").strip() or "—"
                 for i, f in enumerate(files, start=1):
                     try:
                         r = upload_one(svc, f, dest)
                         oks.append((f.name, r.get("webViewLink"))); ids.append(r["id"])
+                        recs.append({"fecha": _now_ar(), "quien": _q, "archivo": f.name,
+                                     "destino": _dl, "estado": "OK", "link": r.get("webViewLink","")})
                     except Exception as e:
                         st.error(f"❌ «{f.name}»: {e}")
+                        recs.append({"fecha": _now_ar(), "quien": _q, "archivo": f.name,
+                                     "destino": _dl, "estado": "ERROR", "link": ""})
                     prog.progress(i/len(files), text=f"Subiendo… {i}/{len(files)}")
                 prog.empty()
+                if recs: hist_log(svc, recs)
                 if oks:
                     st.success(f"¡Listo! Subiste {len(oks)} archivo(s). 🙌")
                     for nm, link in oks:
@@ -380,6 +442,14 @@ if gate():
                                         f'target="_blank">{meta["name"]}</a></div>', unsafe_allow_html=True)
                         if counter["err"]:
                             st.warning(f"{len(counter['err'])} archivo(s) no se pudieron copiar.")
+                        try:
+                            hist_log(svc, [{"fecha": _now_ar(),
+                                "quien": (st.session_state.get("nombre") or "—").strip() or "—",
+                                "archivo": meta["name"] + (" (carpeta)" if meta["mimeType"]==FOLDER_MIME else ""),
+                                "destino": _dest_label(unidad, carpeta, nueva),
+                                "estado": ("OK · %d arch." % counter["n"]) if meta["mimeType"]==FOLDER_MIME else "OK",
+                                "link": ""}])
+                        except Exception: pass
                         emails, names = selected_people()
                         if emails and made_id:
                             share_targets(svc, [made_id], emails)
@@ -398,6 +468,27 @@ if gate():
             elif drive_id is None: _g.append("elegir una unidad")
             if not link: _g.append("pegar el link de Drive")
             if _g: st.markdown('<div class="miss">Para copiar, falta ' + " y ".join(_g) + '.</div>', unsafe_allow_html=True)
+
+    if CONFIG_OK:
+        st.markdown("---")
+        with st.expander("📜  Historial de cargas — chequeá tu archivo y sabés si ya podés borrar tu copia"):
+            try:
+                _data = hist_read(get_drive())
+            except Exception:
+                _data = []
+            if not _data:
+                st.caption("Todavía no hay cargas registradas.")
+            else:
+                _ff = st.text_input("Buscar por nombre o archivo", key="hist_f",
+                                    placeholder="Ej.: María  o  podcast.mp4")
+                _rows = list(reversed(_data))
+                if _ff.strip():
+                    _qq = _ff.strip().lower()
+                    _rows = [r for r in _rows if _qq in (str(r.get("quien",""))+" "+str(r.get("archivo",""))).lower()]
+                st.caption(f"{len(_rows)} registro(s) — mostrando los últimos 80")
+                st.dataframe(_rows[:80], use_container_width=True, hide_index=True,
+                             column_config={"fecha":"Fecha","quien":"Quién","archivo":"Archivo",
+                                            "destino":"Destino","estado":"Estado","link":"Link"})
 
 st.markdown('<div style="text-align:center;color:#b09a7f;font-size:.8rem;margin-top:2.2rem">'
             'René Boiero · buzón de archivos</div>', unsafe_allow_html=True)
