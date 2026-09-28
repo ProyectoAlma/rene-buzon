@@ -1,13 +1,13 @@
 [server]
-maxUploadSize = 2048       # MB por archivo (2 GB). Subilo/bajalo según necesites.
+maxUploadSize = 2048
 headless = true
 
 [browser]
 gatherUsageStats = false
 
 [theme]
-base = "light"
-primaryColor = "#c9781f"
-backgroundColor = "#fbf3e4"
-secondaryBackgroundColor = "#fff7ea"
-textColor = "#3a2a18"
+base = "dark"
+primaryColor = "#d8ad57"
+backgroundColor = "#17111f"
+secondaryBackgroundColor = "#1e1630"
+textColor = "#efe6dc"
