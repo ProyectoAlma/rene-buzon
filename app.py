@@ -28,8 +28,8 @@ st.markdown("""
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;1,9..144,600&family=Inter:wght@400;500;600;700&display=swap');
   :root{
-    --cream:#f7efe0; --card:#fffdf8; --violet:#5b2a86; --violet2:#7d4faf;
-    --violet-deep:#3a1f52; --gold:#c9781f; --ink:#342a3e; --muted:#8f8296;
+    --cream:#f7efe0; --card:#fffdf8; --violet:#6d3fb0; --violet2:#8a5ecb;
+    --violet-deep:#3f2470; --gold:#c9781f; --ink:#342a3e; --muted:#8f8296;
     --line:rgba(91,42,134,.14);
   }
   html, body, [class*="css"], .stApp, input, textarea, button, select{
@@ -62,16 +62,16 @@ st.markdown("""
   .stTextInput input{ border-radius:12px !important; border:1px solid var(--line) !important;
     background:#fff !important; }
   .stTextInput input:focus, [data-baseweb="select"]>div:focus-within{
-    border-color:var(--violet2) !important; box-shadow:0 0 0 3px rgba(125,79,175,.16) !important; }
+    border-color:var(--violet2) !important; box-shadow:0 0 0 3px rgba(138,94,203,.18) !important; }
   [data-testid="stFileUploaderDropzone"]{ background:linear-gradient(180deg,#fff,#fdf6ec) !important;
-    border:1.5px dashed rgba(125,79,175,.42) !important; border-radius:16px !important; }
+    border:1.5px dashed rgba(138,94,203,.42) !important; border-radius:16px !important; }
   [data-testid="stFileUploaderDropzone"]:hover{ border-color:var(--violet2) !important; }
   [data-testid="stFileUploaderDropzone"] button{ border-radius:100px !important;
     border:1px solid var(--line) !important; color:var(--violet) !important; font-weight:600; }
   .stButton>button{ background:linear-gradient(180deg,var(--violet2),var(--violet));
     color:#fff; font-weight:600; border:none; border-radius:100px; padding:.72rem 1.7rem;
     font-size:1rem; letter-spacing:.01em; width:100%;
-    box-shadow:0 16px 30px -14px rgba(91,42,134,.65); transition:.15s; }
+    box-shadow:0 16px 30px -14px rgba(109,63,176,.55); transition:.15s; }
   .stButton>button:hover:enabled{ filter:brightness(1.06); transform:translateY(-1px); }
   .stButton>button:disabled{ background:#ece3ee !important; color:#b3a7bb !important;
     box-shadow:none !important; }
@@ -276,41 +276,42 @@ def selected_people():
     return dedup, names
 
 if gate():
-    st.text_input("Tu nombre (opcional)", key="nombre", placeholder="Ej.: María González")
+    with st.container(border=True):
+        st.text_input("Tu nombre (opcional)", key="nombre", placeholder="Ej.: María González")
 
-    # ---------- DESTINO: unidad + carpeta ----------
-    st.markdown("##### ¿A dónde lo subimos?")
-    drive_id = None; carpeta = RAIZ; folders_map = {}; nueva = ""
-    if CONFIG_OK:
-        try:
-            drives = cached_drives()
-        except Exception as e:
-            drives = []; st.error(f"No pude leer las unidades: {e}")
-        if not drives:
-            st.markdown('<div class="warn">La cuenta de servicio todavía no es miembro de '
-                        'ninguna Unidad compartida. Agregala (como <b>Administrador de contenido</b>) '
-                        'en las unidades que quieras que aparezcan acá.</div>', unsafe_allow_html=True)
+        # ---------- DESTINO: unidad + carpeta ----------
+        st.markdown("##### 1 · ¿A dónde lo subimos?")
+        drive_id = None; carpeta = RAIZ; folders_map = {}; nueva = ""
+        if CONFIG_OK:
+            try:
+                drives = cached_drives()
+            except Exception as e:
+                drives = []; st.error(f"No pude leer las unidades: {e}")
+            if not drives:
+                st.markdown('<div class="warn">La cuenta de servicio todavía no es miembro de '
+                            'ninguna Unidad compartida. Agregala (como <b>Administrador de contenido</b>) '
+                            'en las unidades que quieras que aparezcan acá.</div>', unsafe_allow_html=True)
+            else:
+                dmap = {d["name"]: d["id"] for d in drives}
+                unidad = st.selectbox("Unidad", list(dmap.keys()))
+                drive_id = dmap[unidad]
+                folders = cached_folders(drive_id)
+                folders_map = {f["name"]: f["id"] for f in folders}
+                carpeta = st.selectbox("Carpeta", [RAIZ] + list(folders_map.keys()) + [NUEVA])
+                if carpeta == NUEVA:
+                    nueva = st.text_input("Nombre de la carpeta nueva", placeholder="Ej.: Podcast octubre")
         else:
-            dmap = {d["name"]: d["id"] for d in drives}
-            unidad = st.selectbox("Unidad", list(dmap.keys()))
-            drive_id = dmap[unidad]
-            folders = cached_folders(drive_id)
-            folders_map = {f["name"]: f["id"] for f in folders}
-            carpeta = st.selectbox("Carpeta", [RAIZ] + list(folders_map.keys()) + [NUEVA])
-            if carpeta == NUEVA:
-                nueva = st.text_input("Nombre de la carpeta nueva", placeholder="Ej.: Podcast octubre")
-    else:
-        st.selectbox("Unidad", ["(se llenan cuando esté conectada)"], disabled=True)
-        st.selectbox("Carpeta", [RAIZ, NUEVA], disabled=True)
+            st.selectbox("Unidad", ["(se llenan cuando esté conectada)"], disabled=True)
+            st.selectbox("Carpeta", [RAIZ, NUEVA], disabled=True)
 
-    # ---------- COMPARTIR CON (checklist) ----------
-    st.markdown("##### ¿Compartir con alguien? (les llega un mail y quedan con acceso)")
-    cols = st.columns(len(EQUIPO))
-    for i, p in enumerate(EQUIPO):
-        with cols[i]:
-            st.checkbox(p["nombre"], key="chk_" + p["nombre"])
+        # ---------- COMPARTIR CON (checklist) ----------
+        st.markdown("##### 2 · ¿Compartir con alguien? (les llega un mail y quedan con acceso)")
+        cols = st.columns(len(EQUIPO))
+        for i, p in enumerate(EQUIPO):
+            with cols[i]:
+                st.checkbox(p["nombre"], key="chk_" + p["nombre"])
 
-    st.divider()
+    st.markdown("##### 3 · Subí tu contenido")
     tab1, tab2 = st.tabs(["📁  Desde mi computadora", "☁️  Desde mi Google Drive"])
 
     # -------- TAB 1: desde la compu --------
@@ -351,10 +352,9 @@ if gate():
     # -------- TAB 2: desde Drive --------
     with tab2:
         sa = _sa_email()
-        st.markdown('<div class="hintbox">Pegá el link de una carpeta o archivo de tu Google Drive. '
-                    'Compartilo primero: <b>Compartir</b> → '
-                    + (f'agregá <code>{sa}</code> como Lector' if sa else 'agregá el email de la app')
-                    + ', o poné <b>“Cualquiera con el enlace”</b>.</div>', unsafe_allow_html=True)
+        st.markdown('<div class="hintbox">Pegá el link de una carpeta o archivo de tu Google Drive y se copia enterito a la unidad. Antes, en tu Drive: <b>Compartir</b> → agregá este correo como <b>Lector</b> (o poné <b>“Cualquiera con el enlace”</b>). Copialo con el botón 👇</div>', unsafe_allow_html=True)
+        if sa:
+            st.code(sa, language=None)
         link = st.text_input("Link de Google Drive",
                              placeholder="https://drive.google.com/drive/folders/…")
         disabled2 = (not CONFIG_OK) or (drive_id is None) or (not link)
