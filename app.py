@@ -26,33 +26,72 @@ EQUIPO = [
 # ----------------------------- Estilos (branded) -----------------------------
 st.markdown("""
 <style>
-  :root{ --amber:#c9781f; --amber2:#e79b3a; --ink:#3a2a18; --muted:#8a745c; }
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;1,9..144,600&family=Inter:wght@400;500;600;700&display=swap');
+  :root{
+    --cream:#f7efe0; --card:#fffdf8; --violet:#5b2a86; --violet2:#7d4faf;
+    --violet-deep:#3a1f52; --gold:#c9781f; --ink:#342a3e; --muted:#8f8296;
+    --line:rgba(91,42,134,.14);
+  }
+  html, body, [class*="css"], .stApp, input, textarea, button, select{
+    font-family:'Inter',system-ui,-apple-system,sans-serif; }
   .stApp{ background:
-      radial-gradient(120% 60% at 90% -10%, #fce3c0 0%, transparent 55%),
-      radial-gradient(120% 60% at -10% 8%, #ffeede 0%, transparent 50%),
-      #fbf3e4; }
-  #MainMenu, footer, header {visibility:hidden;}
-  .block-container{ max-width:730px; padding-top:2.2rem; }
-  .hero{ font-size:2.05rem; line-height:1.12; font-weight:800; color:var(--ink);
-     margin:.6rem 0 .3rem; letter-spacing:-.01em; text-align:center;}
-  .hero span{ color:var(--amber); }
-  .lead{ color:var(--muted); font-size:1.0rem; margin-bottom:1.1rem; text-align:center;}
-  .stButton>button{ background:linear-gradient(180deg,var(--amber2),var(--amber));
-     color:#231206; font-weight:700; border:none; border-radius:100px;
-     padding:.7rem 1.6rem; font-size:1rem; box-shadow:0 12px 26px -12px rgba(201,120,31,.7);}
-  .stButton>button:hover{ filter:brightness(1.05); }
-  .ok{ background:#eef7ec; border:1px solid #bfe0b6; border-radius:12px; padding:.55rem .9rem;
-     color:#2f5d2a; margin:.3rem 0; font-size:.92rem;}
-  .warn{ background:#fdf0d8; border:1px solid #f0cf8c; border-radius:12px; padding:.8rem 1rem;
-     color:#7a5417; font-size:.92rem;}
-  .hintbox{ background:#fff7ea; border:1px dashed rgba(150,110,55,.4); border-radius:12px;
-     padding:.7rem .95rem; color:#6a4c22; font-size:.86rem; margin:.2rem 0 1rem;}
-  code{ color:#8a4b12; background:#fbe2d0; }
-  a{ color:var(--amber); font-weight:600; }
-  .logo{ width:230px; max-width:66%; margin:.2rem auto .2rem; display:inline-block; filter:drop-shadow(0 6px 11px rgba(74,26,92,.45)); }
-  .hero-img{ width:100%; border-radius:16px; display:block; margin:.2rem 0 1.1rem;
-     box-shadow:0 22px 46px -30px rgba(120,80,25,.55); }
-</style>
+    radial-gradient(130% 72% at 88% -12%, #efd9f2 0%, transparent 52%),
+    radial-gradient(120% 60% at -8% 4%, #fbe9d4 0%, transparent 48%),
+    var(--cream); color:var(--ink); }
+  #MainMenu, footer, header{ visibility:hidden; }
+  .block-container{ max-width:640px; padding-top:2.4rem; padding-bottom:3rem; }
+  .logo{ width:148px; max-width:46%; margin:.2rem auto .7rem; display:inline-block;
+    filter:drop-shadow(0 8px 16px rgba(58,31,82,.32)); }
+  .hero-img{ width:100%; border-radius:20px; display:block; margin:.4rem 0 1.4rem;
+    box-shadow:0 30px 62px -34px rgba(58,31,82,.55); border:1px solid rgba(255,255,255,.55); }
+  .hero{ font-family:'Fraunces',Georgia,serif; font-size:2.5rem; line-height:1.06; font-weight:600;
+    color:var(--violet-deep); margin:.4rem 0 .35rem; letter-spacing:-.015em; text-align:center; }
+  .hero span{ color:var(--gold); font-style:italic; }
+  .lead{ color:var(--muted); font-size:1.02rem; line-height:1.5; margin:0 auto 1.7rem;
+    text-align:center; max-width:31rem; }
+  h5, .stMarkdown h5{ font-family:'Fraunces',Georgia,serif !important; font-weight:600 !important;
+    color:var(--violet-deep) !important; font-size:1.18rem !important; letter-spacing:-.01em;
+    margin:.3rem 0 .7rem !important; }
+  [data-testid="stVerticalBlockBorderWrapper"]{ background:var(--card);
+    border:1px solid var(--line) !important; border-radius:20px !important;
+    box-shadow:0 20px 44px -32px rgba(58,31,82,.42); }
+  label, .stSelectbox label, .stTextInput label{ color:var(--ink) !important;
+    font-weight:600 !important; font-size:.9rem !important; }
+  [data-baseweb="select"]>div{ background:#fff !important; border-radius:12px !important;
+    border:1px solid var(--line) !important; }
+  .stTextInput input{ border-radius:12px !important; border:1px solid var(--line) !important;
+    background:#fff !important; }
+  .stTextInput input:focus, [data-baseweb="select"]>div:focus-within{
+    border-color:var(--violet2) !important; box-shadow:0 0 0 3px rgba(125,79,175,.16) !important; }
+  [data-testid="stFileUploaderDropzone"]{ background:linear-gradient(180deg,#fff,#fdf6ec) !important;
+    border:1.5px dashed rgba(125,79,175,.42) !important; border-radius:16px !important; }
+  [data-testid="stFileUploaderDropzone"]:hover{ border-color:var(--violet2) !important; }
+  [data-testid="stFileUploaderDropzone"] button{ border-radius:100px !important;
+    border:1px solid var(--line) !important; color:var(--violet) !important; font-weight:600; }
+  .stButton>button{ background:linear-gradient(180deg,var(--violet2),var(--violet));
+    color:#fff; font-weight:600; border:none; border-radius:100px; padding:.72rem 1.7rem;
+    font-size:1rem; letter-spacing:.01em; width:100%;
+    box-shadow:0 16px 30px -14px rgba(91,42,134,.65); transition:.15s; }
+  .stButton>button:hover:enabled{ filter:brightness(1.06); transform:translateY(-1px); }
+  .stButton>button:disabled{ background:#ece3ee !important; color:#b3a7bb !important;
+    box-shadow:none !important; }
+  [data-baseweb="tab-list"]{ gap:.5rem; background:transparent !important;
+    border-bottom:1px solid var(--line); }
+  [data-baseweb="tab"]{ font-weight:600; color:var(--muted); }
+  [data-baseweb="tab"][aria-selected="true"]{ color:var(--violet) !important; }
+  [data-baseweb="tab-highlight"]{ background:var(--violet) !important; }
+  [data-testid="stCheckbox"] label{ font-weight:600; color:var(--ink) !important; }
+  .stProgress > div > div > div{ background:var(--violet) !important; }
+  .ok{ background:#f0f7ee; border:1px solid #c6e3bd; border-radius:14px; padding:.6rem .95rem;
+    color:#2f5d2a; margin:.35rem 0; font-size:.92rem; }
+  .warn{ background:#f7edfa; border:1px solid #e0c7ee; border-radius:14px; padding:.85rem 1.05rem;
+    color:#5b2a86; font-size:.92rem; }
+  .hintbox{ background:#fbf4ff; border:1px dashed rgba(125,79,175,.35); border-radius:14px;
+    padding:.75rem 1rem; color:#5b3a6e; font-size:.86rem; margin:.2rem 0 1rem; }
+  .miss{ text-align:center; color:var(--muted); font-size:.87rem; margin:.55rem 0 0; }
+  code{ color:var(--violet); background:#f0e6f6; padding:.05rem .35rem; border-radius:6px; }
+  a{ color:var(--violet); font-weight:600; }
+  </style>
 """, unsafe_allow_html=True)
 
 st.markdown("""
@@ -302,7 +341,12 @@ if gate():
                         share_ids = [dest] if carpeta == NUEVA else ids
                         share_targets(svc, share_ids, emails)
                         st.info("📧 Compartido con: " + ", ".join(names))
-        if not CONFIG_OK: st.caption("En vista previa el botón está deshabilitado.")
+        if disabled:
+            _f = []
+            if not CONFIG_OK: _f.append("conectar el Drive")
+            elif drive_id is None: _f.append("elegir una unidad")
+            if not files: _f.append("arrastrar al menos un archivo")
+            if _f: st.markdown('<div class="miss">Para subir, falta ' + " y ".join(_f) + '.</div>', unsafe_allow_html=True)
 
     # -------- TAB 2: desde Drive --------
     with tab2:
@@ -350,7 +394,12 @@ if gate():
                                      + "o puesto en “Cualquiera con el enlace”.")
                         else:
                             st.error(f"Problema al copiar: {e}")
-        if not CONFIG_OK: st.caption("En vista previa el botón está deshabilitado.")
+        if disabled2:
+            _g = []
+            if not CONFIG_OK: _g.append("conectar el Drive")
+            elif drive_id is None: _g.append("elegir una unidad")
+            if not link: _g.append("pegar el link de Drive")
+            if _g: st.markdown('<div class="miss">Para copiar, falta ' + " y ".join(_g) + '.</div>', unsafe_allow_html=True)
 
 st.markdown('<div style="text-align:center;color:#b09a7f;font-size:.8rem;margin-top:2.2rem">'
             'René Boiero · buzón de archivos</div>', unsafe_allow_html=True)
